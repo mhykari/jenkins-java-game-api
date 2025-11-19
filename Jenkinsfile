@@ -2,13 +2,14 @@ pipeline {
     agent none
 
     environment {
-        REPO_URL = 'https://github.com/mhykari/jenkins-test.git'
-        PROJECT_DIR = 'java-api'
-        IMAGE_NAME = 'jaaava-api'
-        CONTAINER_NAME = 'java-api-container'
+        REPO_URL       = 'https://github.com/mhykari/jenkins-java-game-api.git'
+        PROJECT_DIR    = 'guess-the-number'
+        IMAGE_NAME     = 'guess-number-api'
+        CONTAINER_NAME = 'guess-number-api-container'
     }
 
     stages {
+
         stage('Checkout Code') {
             agent any
             steps {
@@ -41,7 +42,7 @@ pipeline {
                     unstash 'jarFile'
                     sh '''
                         export DOCKER_BUILDKIT=1
-                        docker build -t java-api:latest .
+                        docker build -t ${IMAGE_NAME}:latest .
                     '''
                 }
             }
@@ -53,20 +54,19 @@ pipeline {
                 dir("${PROJECT_DIR}") {
                     echo "Creating docker-compose.yml dynamically..."
 
-                    // create docker-compose.yml file dynamically
-                    writeFile file: 'docker-compose.yml', text: '''
-version: "3.8"
+                    writeFile file: 'docker-compose.yml', text: """
+version: '3.8'
 
 services:
-  java-api:
-    image: java-api:latest
-    container_name: java-api-container
+  guess-number-api:
+    image: ${IMAGE_NAME}:latest
+    container_name: ${CONTAINER_NAME}
     ports:
-      - "8085:8080"
+      - '8085:8080'
     restart: unless-stopped
-'''
+"""
 
-                    echo "Starting deployment with Docker Compose..."
+                    echo "Deploying with Docker Compose..."
                     sh '''
                         docker compose down || true
                         docker compose up -d --build
@@ -78,10 +78,10 @@ services:
 
     post {
         success {
-            echo 'Deployment completed successfully.'
+            echo 'Guess-the-number API deployed successfully.'
         }
         failure {
-            echo 'Pipeline failed. Check logs for details.'
+            echo 'Pipeline failed. Check logs.'
         }
         always {
             script {

@@ -23,7 +23,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar') {   // sonar = name in Jenkins Configure System
                     script {
-                        def scannerHome = tool 'sonar'   // <--- FIX
+                        def scannerHome = tool 'sonar-scanner'   // <--- FIX
                         dir("${PROJECT_DIR}") {
                             sh """
                                 ${scannerHome}/bin/sonar-scanner \

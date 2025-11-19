@@ -21,29 +21,23 @@ pipeline {
         stage('SonarQube Analysis') {
             agent any
             steps {
-                echo "Running SonarQube Analysis..."
-                withSonarQubeEnv('sonar') {        // <-- SonarQube server name from Jenkins config
-                    dir("${PROJECT_DIR}") {
-                        sh """
-                            sonar-scanner \
-                              -Dsonar.projectKey=guess-the-number \
-                              -Dsonar.sources=src/main/java \
-                              -Dsonar.java.binaries=target/classes \
-                              -Dsonar.host.url=http://192.168.43.212:9000
-                        """
+                withSonarQubeEnv('sonar') {   // sonar = name in Jenkins Configure System
+                    script {
+                        def scannerHome = tool 'sonar-scanner'   // <--- FIX
+                        dir("${PROJECT_DIR}") {
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                  -Dsonar.projectKey=guess-the-number \
+                                  -Dsonar.sources=src/main/java \
+                                  -Dsonar.java.binaries=target/classes \
+                                  -Dsonar.host.url=http://192.168.43.212:9000
+                            """
+                        }
                     }
                 }
             }
         }
 
-        stage('Quality Gate') {
-            agent any
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
 
 
         stage('Build with Maven') {

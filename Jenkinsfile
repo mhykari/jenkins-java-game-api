@@ -18,6 +18,24 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            agent any
+            steps {
+                echo "Running SonarQube Analysis..."
+                withSonarQubeEnv('sonar') {        // <-- SonarQube server name from Jenkins config
+                    dir("${PROJECT_DIR}") {
+                        sh """
+                            sonar-scanner \
+                              -Dsonar.projectKey=guess-the-number \
+                              -Dsonar.sources=src/main/java \
+                              -Dsonar.java.binaries=target/classes \
+                              -Dsonar.host.url=http://172.17.0.1:9000
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Build with Maven') {
             agent {
                 docker {

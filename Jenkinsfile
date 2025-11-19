@@ -29,7 +29,7 @@ pipeline {
                               -Dsonar.projectKey=guess-the-number \
                               -Dsonar.sources=src/main/java \
                               -Dsonar.java.binaries=target/classes \
-                              -Dsonar.host.url=http://172.17.0.1:9000
+                              -Dsonar.host.url=http://192.168.43.212:9000
                         """
                     }
                 }

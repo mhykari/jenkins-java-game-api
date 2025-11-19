@@ -18,26 +18,6 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            agent any
-            steps {
-                withSonarQubeEnv('sonar') {   // sonar = name in Jenkins Configure System
-                    script {
-                        def scannerHome = tool 'sonar-scanner'   // <--- FIX
-                        dir("${PROJECT_DIR}") {
-                            sh """
-                                ${scannerHome}/bin/sonar-scanner \
-                                  -Dsonar.projectKey=guess-the-number \
-                                  -Dsonar.sources=src/main/java \
-                                  -Dsonar.java.binaries=target/classes \
-                                  -Dsonar.host.url=http://192.168.43.212:9000
-                            """
-                        }
-                    }
-                }
-            }
-        }
-
         stage('Build with Maven') {
             agent {
                 docker {
@@ -53,6 +33,27 @@ pipeline {
                 }
             }
         }
+
+        stage('SonarQube Analysis') {
+            agent any
+            steps {
+                withSonarQubeEnv('sonar') {
+                    script {
+                        def scannerHome = tool 'sonar-scanner'
+                        dir("${PROJECT_DIR}") {
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                  -Dsonar.projectKey=guess-the-number \
+                                  -Dsonar.sources=src/main/java \
+                                  -Dsonar.java.binaries=target/classes \
+                                  -Dsonar.host.url=http://192.168.43.212:9000
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
 
         stage('Build Docker Image') {
             agent any
